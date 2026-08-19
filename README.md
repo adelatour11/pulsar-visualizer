@@ -4,6 +4,9 @@ A minimalist HTML5 audio visualizer inspired by the iconic **Joy Division – Un
 
 The visualization reacts in real time to the audio frequency/time-domain data and creates a scrolling stack of white waveform lines on a black background.
 
+<img width="643" height="1473" alt="image" src="https://github.com/user-attachments/assets/9fba99d9-a4ee-4cf3-bb51-3a8cfc4696c2" />
+
+
 ## Usage
 
 Simply open `index.html` in a modern web browser.

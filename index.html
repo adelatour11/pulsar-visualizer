@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Pulsar Joy Waveform Visualizer</title>
+
+    <!-- Open Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- MP3 ID3 metadata reader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+
+            width: 100%;
+            height: 100%;
+
+            background: #000;
+
+            font-family: "Open Sans", sans-serif;
+        }
+
+        canvas {
+            width: 100vw;
+            height: 100vh;
+
+            display: block;
+
+            background: #000;
+        }
+
+
+        /* =========================================================
+           LOAD BUTTON
+           ========================================================= */
+
+        #control-panel {
+            position: absolute;
+
+            top: 18px;
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            z-index: 30;
+
+            background: rgba(5, 5, 5, 0.9);
+
+            padding: 7px 10px;
+
+            border: 1px solid #151515;
+
+            border-radius: 4px;
+
+            box-shadow:
+                0 8px 30px rgba(0, 0, 0, 0.8);
+        }
+
+
+        .file-input-wrapper {
+            position: relative;
+
+            overflow: hidden;
+
+            display: inline-block;
+        }
+
+
+        .btn-upload {
+            border: 1px solid #333;
+
+            color: #666;
+
+            background: transparent;
+
+            padding: 5px 11px;
+
+            border-radius: 3px;
+
+            font-family: "Open Sans", sans-serif;
+
+            font-size: 10px;
+
+            font-weight: 600;
+
+            letter-spacing: 1px;
+
+            cursor: pointer;
+
+            transition:
+                color 0.2s ease,
+                border-color 0.2s ease,
+                background 0.2s ease;
+        }
+
+
+        .btn-upload:hover {
+            color: #ddd;
+
+            border-color: #777;
+
+            background: #0a0a0a;
+        }
+
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+
+            left: 0;
+            top: 0;
+
+            width: 100%;
+            height: 100%;
+
+            opacity: 0;
+
+            cursor: pointer;
+        }
+
+
+        /* =========================================================
+           ARTIST
+           ========================================================= */
+
+        #artist-container {
+            position: absolute;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 320px;
+
+            z-index: 20;
+
+            pointer-events: none;
+
+            text-align: center;
+        }
+
+
+        #artist-name {
+            width: 100%;
+
+            font-family: "Open Sans", sans-serif;
+
+            font-size: 20px;
+
+            font-weight: 600;
+
+            letter-spacing: 4px;
+
+            line-height: 20px;
+
+            color: #fff;
+
+            text-transform: uppercase;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+
+        /* =========================================================
+           TRACK TITLE
+           ========================================================= */
+
+        #track-container {
+            position: absolute;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            width: 320px;
+
+            z-index: 20;
+
+            pointer-events: none;
+
+            text-align: center;
+        }
+
+
+        #song-name {
+            width: 100%;
+
+            font-family: "Open Sans", sans-serif;
+
+            font-size: 11px;
+
+            font-weight: 400;
+
+            letter-spacing: 2px;
+
+            line-height: 18px;
+
+            color: #999;
+
+            text-transform: uppercase;
+
+            white-space: nowrap;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+        }
+
+
+        /* =========================================================
+           DISCREET AUDIO PLAYER
+           ========================================================= */
+
+        #audio-container {
+            position: absolute;
+
+            left: 50%;
+
+            bottom: 7px;
+
+            transform: translateX(-50%);
+
+            z-index: 40;
+
+            opacity: 0.22;
+
+            transition: opacity 0.25s ease;
+        }
+
+
+        #audio-container:hover {
+            opacity: 0.75;
+        }
+
+
+        audio {
+            display: block;
+
+            width: 260px;
+
+            height: 22px;
+
+            background: transparent;
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+    <!-- =========================================================
+         LOAD MP3
+         ========================================================= -->
+
+    <div id="control-panel">
+
+        <div class="file-input-wrapper">
+
+            <button class="btn-upload">
+                LOAD MP3
+            </button>
+
+            <input
+                type="file"
+                id="audio-file"
+                accept="audio/*"
+            >
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         ARTIST
+         ========================================================= -->
+
+    <div id="artist-container">
+
+        <div id="artist-name">
+            SELECT ARTIST
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         TRACK TITLE
+         ========================================================= -->
+
+    <div id="track-container">
+
+        <div id="song-name">
+            SELECT A MUSIC TRACK
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         AUDIO PLAYER
+         ========================================================= -->
+
+    <div id="audio-container">
+
+        <audio
+            id="audio-player"
+            controls
+        ></audio>
+
+    </div>
+
+
+    <!-- =========================================================
+         CANVAS
+         ========================================================= -->
+
+    <canvas id="canvas"></canvas>
+
+
+    <script>
+
+        // =========================================================
+        // CONFIGURATION
+        // =========================================================
+
+        /*
+         * Width of the visualization.
+         *
+         * Artist and track title use exactly this same width.
+         */
+
+        const CONFIG_GRAPH_WIDTH_PX = 320;
+
+
+        /*
+         * Distance between waveform lines.
+         */
+
+        const CONFIG_VERTICAL_SPACING_PX = 8;
+
+
+        /*
+         * Maximum waveform displacement.
+         */
+
+        const CONFIG_PEAK_MAX_HEIGHT_PX = 80;
+
+
+        /*
+         * Waveform line thickness.
+         */
+
+        const CONFIG_LINE_THICKNESS = 1.3;
+
+
+        /*
+         * Maximum amplitude clamp.
+         */
+
+        const CONFIG_PEAK_MAX_CLAMP_PCT = 1.0;
+
+
+        /*
+         * Smoothing / decay.
+         */
+
+        const SMOOTHING_DECAY = 0.82;
+
+
+        /*
+         * Time between new history lines.
+         *
+         * 16  = very fast
+         * 20  = fast
+         * 50  = medium
+         * 100 = slow
+         */
+
+        const ACCUMULATION_INTERVAL_MS = 20;
+
+
+        // =========================================================
+        // DOM REFERENCES
+        // =========================================================
+
+        const fileInput =
+            document.getElementById("audio-file");
+
+        const audioPlayer =
+            document.getElementById("audio-player");
+
+        const artistName =
+            document.getElementById("artist-name");
+
+        const songName =
+            document.getElementById("song-name");
+
+        const artistContainer =
+            document.getElementById("artist-container");
+
+        const trackContainer =
+            document.getElementById("track-container");
+
+        const canvas =
+            document.getElementById("canvas");
+
+        const ctx =
+            canvas.getContext("2d");
+
+
+        // =========================================================
+        // AUDIO VARIABLES
+        // =========================================================
+
+        let audioCtx = null;
+
+        let analyser = null;
+
+        let sourceNode = null;
+
+        let dataArray = null;
+
+
+        // =========================================================
+        // WAVEFORM VARIABLES
+        // =========================================================
+
+        const totalPoints = 80;
+
+        let historyBuffer = [];
+
+        let currentSmoothedFrame =
+            new Float32Array(
+                totalPoints + 1
+            ).fill(0);
+
+        let lastAccumulationTime = 0;
+
+        const maxBufferRows = 400;
+
+
+        // =========================================================
+        // INITIALIZE HISTORY
+        // =========================================================
+
+        function clearHistory() {
+
+            historyBuffer = [];
+
+            for (
+                let i = 0;
+                i < maxBufferRows;
+                i++
+            ) {
+
+                historyBuffer.push(
+                    new Float32Array(
+                        totalPoints + 1
+                    ).fill(0)
+                );
+            }
+
+            currentSmoothedFrame.fill(0);
+        }
+
+
+        clearHistory();
+
+
+        // =========================================================
+        // CANVAS RESIZE
+        // =========================================================
+
+        function resizeCanvas() {
+
+            canvas.width =
+                window.innerWidth;
+
+            canvas.height =
+                window.innerHeight;
+
+            positionMetadata();
+        }
+
+
+        window.addEventListener(
+            "resize",
+            resizeCanvas
+        );
+
+
+        resizeCanvas();
+
+
+        // =========================================================
+        // POSITION ARTIST AND TRACK
+        // =========================================================
+
+        function positionMetadata() {
+
+            /*
+             * This is the same vertical geometry used
+             * by the waveform itself.
+             */
+
+            const landscapeAreaHeight =
+                canvas.height * 0.6;
+
+
+            const calculatedTotalLines =
+                Math.min(
+                    Math.floor(
+                        landscapeAreaHeight /
+                        CONFIG_VERTICAL_SPACING_PX
+                    ),
+                    maxBufferRows - 5
+                );
+
+
+            /*
+             * Center of the waveform.
+             */
+
+            const globalYCenter =
+                (canvas.height / 2) +
+                (landscapeAreaHeight / 2);
+
+
+            /*
+             * TOP of waveform.
+             *
+             * This is where the artist will be placed.
+             */
+
+            const waveformTop =
+                globalYCenter -
+                (
+                    (calculatedTotalLines - 1) *
+                    CONFIG_VERTICAL_SPACING_PX
+                );
+
+
+            /*
+             * BOTTOM of waveform.
+             *
+             * This is where the track title will be placed.
+             */
+
+            const waveformBottom =
+                globalYCenter;
+
+
+            // =====================================================
+            // ARTIST
+            // =====================================================
+
+            const artistHeight =
+                artistContainer.offsetHeight;
+
+
+            artistContainer.style.top =
+                (
+                    waveformTop -
+                    artistHeight -
+                    70
+                ) + "px";
+
+
+            // =====================================================
+            // TRACK
+            // =====================================================
+
+            trackContainer.style.top =
+                (
+                    waveformBottom +
+                    20
+                ) + "px";
+        }
+
+
+        // =========================================================
+        // INITIALIZE AUDIO
+        // =========================================================
+
+        function initAudioPipeline() {
+
+            /*
+             * If an AudioContext already exists,
+             * disconnect it first.
+             */
+
+            if (audioCtx) {
+
+                try {
+                    sourceNode.disconnect();
+                } catch (e) {}
+
+                try {
+                    audioCtx.close();
+                } catch (e) {}
+            }
+
+
+            /*
+             * Create new Web Audio context.
+             */
+
+            audioCtx =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
+
+
+            /*
+             * Create analyser.
+             */
+
+            analyser =
+                audioCtx.createAnalyser();
+
+
+            /*
+             * FFT size.
+             */
+
+            analyser.fftSize = 256;
+
+
+            /*
+             * Frequency/time-domain data.
+             */
+
+            dataArray =
+                new Uint8Array(
+                    analyser.frequencyBinCount
+                );
+
+
+            /*
+             * Connect audio element.
+             */
+
+            sourceNode =
+                audioCtx.createMediaElementSource(
+                    audioPlayer
+                );
+
+
+            sourceNode.connect(
+                analyser
+            );
+
+
+            analyser.connect(
+                audioCtx.destination
+            );
+        }
+
+
+        // =========================================================
+        // READ MP3 METADATA
+        // =========================================================
+
+        function readMP3Metadata(file) {
+
+            /*
+             * Temporary values while loading.
+             */
+
+            artistName.textContent =
+                "UNKNOWN ARTIST";
+
+            songName.textContent =
+                "UNKNOWN TRACK";
+
+
+            /*
+             * Read ID3 metadata.
+             */
+
+            jsmediatags.read(
+                file,
+
+                {
+
+                    onSuccess: function(tag) {
+
+                        const tags =
+                            tag.tags || {};
+
+
+                        /*
+                         * ID3 artist:
+                         *
+                         * TPE1
+                         */
+
+                        const artist =
+                            tags.artist ||
+                            tags.TPE1 ||
+                            "JOY DIVISION";
+
+
+                        /*
+                         * ID3 title:
+                         *
+                         * TIT2
+                         */
+
+                        const title =
+                            tags.title ||
+                            tags.TIT2 ||
+                            "UNKNOWN PLEASURES";
+
+
+                        artistName.textContent =
+                            artist;
+
+
+                        songName.textContent =
+                            title;
+
+
+                        /*
+                         * Recalculate positions in case
+                         * the text dimensions changed.
+                         */
+
+                        positionMetadata();
+                    },
+
+
+                    onError: function(error) {
+
+                        console.log(
+                            "Unable to read ID3 metadata:",
+                            error
+                        );
+
+
+                        artistName.textContent =
+                            "UNKNOWN ARTIST";
+
+
+                        songName.textContent =
+                            "UNKNOWN TRACK";
+
+
+                        positionMetadata();
+                    }
+
+                }
+            );
+        }
+
+
+        // =========================================================
+        // FILE INPUT
+        // =========================================================
+
+        fileInput.addEventListener(
+            "change",
+            function(event) {
+
+                const file =
+                    event.target.files &&
+                    event.target.files[0];
+
+
+                if (!file) {
+                    return;
+                }
+
+
+                /*
+                 * Read artist/title from MP3.
+                 */
+
+                readMP3Metadata(file);
+
+
+                /*
+                 * Create local URL.
+                 */
+
+                audioPlayer.src =
+                    URL.createObjectURL(file);
+
+
+                /*
+                 * Initialize analyser.
+                 */
+
+                initAudioPipeline();
+
+
+                /*
+                 * Clear previous visualization.
+                 */
+
+                clearHistory();
+
+
+                /*
+                 * Resume AudioContext if necessary.
+                 */
+
+                if (
+                    audioCtx &&
+                    audioCtx.state === "suspended"
+                ) {
+
+                    audioCtx.resume();
+                }
+
+
+                /*
+                 * Start playback.
+                 */
+
+                audioPlayer
+                    .play()
+                    .catch(
+                        error =>
+                            console.log(error)
+                    );
+
+            }
+        );
+
+
+        // =========================================================
+        // ANIMATION
+        // =========================================================
+
+        requestAnimationFrame(animate);
+
+
+        function animate() {
+
+            requestAnimationFrame(animate);
+
+
+            // =====================================================
+            // AUDIO ANALYSIS
+            // =====================================================
+
+            if (
+                analyser &&
+                dataArray &&
+                !audioPlayer.paused
+            ) {
+
+                analyser.getByteTimeDomainData(
+                    dataArray
+                );
+            }
+
+
+            const currentTime =
+                performance.now();
+
+
+            // =====================================================
+            // LIVE SNAPSHOT
+            // =====================================================
+
+            const liveSnapshot =
+                new Float32Array(
+                    totalPoints + 1
+                );
+
+
+            const clampHeightPx =
+                CONFIG_PEAK_MAX_HEIGHT_PX *
+                CONFIG_PEAK_MAX_CLAMP_PCT;
+
+
+            for (
+                let s = 0;
+                s <= totalPoints;
+                s++
+            ) {
+
+                let targetHeight = 0;
+
+
+                if (
+                    analyser &&
+                    dataArray &&
+                    !audioPlayer.paused
+                ) {
+
+                    const sample =
+                        s / totalPoints;
+
+
+                    const dataIndex =
+                        Math.floor(
+                            sample *
+                            (
+                                dataArray.length - 1
+                            )
+                        );
+
+
+                    const displacement =
+                        Math.abs(
+                            dataArray[dataIndex] -
+                            128
+                        );
+
+
+                    targetHeight =
+                        (
+                            displacement /
+                            128
+                        ) *
+                        CONFIG_PEAK_MAX_HEIGHT_PX *
+                        2.2;
+
+
+                    if (
+                        targetHeight >
+                        clampHeightPx
+                    ) {
+
+                        targetHeight =
+                            clampHeightPx;
+                    }
+                }
+
+
+                // =================================================
+                // SMOOTHING
+                // =================================================
+
+                if (
+                    targetHeight >=
+                    currentSmoothedFrame[s]
+                ) {
+
+                    currentSmoothedFrame[s] =
+                        targetHeight;
+
+                } else {
+
+                    currentSmoothedFrame[s] =
+                        (
+                            currentSmoothedFrame[s] *
+                            SMOOTHING_DECAY
+                        ) +
+                        (
+                            targetHeight *
+                            (
+                                1 -
+                                SMOOTHING_DECAY
+                            )
+                        );
+                }
+
+
+                liveSnapshot[s] =
+                    currentSmoothedFrame[s];
+            }
+
+
+            // =====================================================
+            // ADD TO HISTORY
+            // =====================================================
+
+            if (
+                currentTime -
+                lastAccumulationTime >=
+                ACCUMULATION_INTERVAL_MS
+            ) {
+
+                historyBuffer.unshift(
+                    liveSnapshot
+                );
+
+
+                if (
+                    historyBuffer.length >
+                    maxBufferRows
+                ) {
+
+                    historyBuffer.pop();
+                }
+
+
+                lastAccumulationTime =
+                    currentTime;
+
+            } else {
+
+                /*
+                 * Keep the front line responsive.
+                 */
+
+                historyBuffer[0] =
+                    liveSnapshot;
+            }
+
+
+            // =====================================================
+            // CLEAR CANVAS
+            // =====================================================
+
+            ctx.fillStyle =
+                "#000000";
+
+
+            ctx.fillRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+            // =====================================================
+            // WAVEFORM GEOMETRY
+            // =====================================================
+
+            const landscapeAreaHeight =
+                canvas.height * 0.6;
+
+
+            const calculatedTotalLines =
+                Math.min(
+                    Math.floor(
+                        landscapeAreaHeight /
+                        CONFIG_VERTICAL_SPACING_PX
+                    ),
+                    maxBufferRows - 5
+                );
+
+
+            const globalYCenter =
+                (canvas.height / 2) +
+                (landscapeAreaHeight / 2);
+
+
+            /*
+             * Horizontal center.
+             */
+
+            const startX_Px =
+                (canvas.width / 2) -
+                (
+                    CONFIG_GRAPH_WIDTH_PX / 2
+                );
+
+
+            // =====================================================
+            // DRAW WAVEFORM
+            // =====================================================
+
+            for (
+                let w =
+                    calculatedTotalLines - 1;
+
+                w >= 0;
+
+                w--
+            ) {
+
+                const lineData =
+                    historyBuffer[w];
+
+
+                if (!lineData) {
+                    continue;
+                }
+
+
+                /*
+                 * Vertical position of this line.
+                 */
+
+                const base_y_px =
+                    globalYCenter -
+                    (
+                        w *
+                        CONFIG_VERTICAL_SPACING_PX
+                    );
+
+
+                const firstX =
+                    startX_Px;
+
+
+                const lastX =
+                    startX_Px +
+                    CONFIG_GRAPH_WIDTH_PX;
+
+
+                // =================================================
+                // BLACK OCCLUSION
+                // =================================================
+
+                ctx.beginPath();
+
+
+                for (
+                    let s = 0;
+                    s <= totalPoints;
+                    s++
+                ) {
+
+                    const sample =
+                        s / totalPoints;
+
+
+                    /*
+                     * Gaussian mask.
+                     *
+                     * Keeps the waveform strongest
+                     * around the center.
+                     */
+
+                    const mask =
+                        Math.exp(
+                            -Math.pow(
+                                (
+                                    sample - 0.5
+                                ) * 5.0,
+                                2
+                            )
+                        );
+
+
+                    const screenX =
+                        startX_Px +
+                        (
+                            sample *
+                            CONFIG_GRAPH_WIDTH_PX
+                        );
+
+
+                    const screenY =
+                        base_y_px -
+                        (
+                            lineData[s] *
+                            mask
+                        );
+
+
+                    if (s === 0) {
+
+                        ctx.moveTo(
+                            screenX,
+                            screenY
+                        );
+
+                    } else {
+
+                        ctx.lineTo(
+                            screenX,
+                            screenY
+                        );
+                    }
+                }
+
+
+                ctx.lineTo(
+                    lastX,
+                    base_y_px
+                );
+
+
+                ctx.lineTo(
+                    firstX,
+                    base_y_px
+                );
+
+
+                ctx.closePath();
+
+
+                ctx.fillStyle =
+                    "#000000";
+
+
+                ctx.fill();
+
+
+                // =================================================
+                // WHITE WAVEFORM LINE
+                // =================================================
+
+                ctx.beginPath();
+
+
+                ctx.lineWidth =
+                    CONFIG_LINE_THICKNESS;
+
+
+                ctx.strokeStyle =
+                    "#ffffff";
+
+
+                for (
+                    let s = 0;
+                    s <= totalPoints;
+                    s++
+                ) {
+
+                    const sample =
+                        s / totalPoints;
+
+
+                    const mask =
+                        Math.exp(
+                            -Math.pow(
+                                (
+                                    sample - 0.5
+                                ) * 5.0,
+                                2
+                            )
+                        );
+
+
+                    const screenX =
+                        startX_Px +
+                        (
+                            sample *
+                            CONFIG_GRAPH_WIDTH_PX
+                        );
+
+
+                    const screenY =
+                        base_y_px -
+                        (
+                            lineData[s] *
+                            mask
+                        );
+
+
+                    if (s === 0) {
+
+                        ctx.moveTo(
+                            screenX,
+                            screenY
+                        );
+
+                    } else {
+
+                        ctx.lineTo(
+                            screenX,
+                            screenY
+                        );
+                    }
+                }
+
+
+                ctx.stroke();
+            }
+
+
+            // =====================================================
+            // KEEP METADATA ALIGNED
+            // =====================================================
+
+            positionMetadata();
+        }
+
+    </script>
+
+</body>
+</html>

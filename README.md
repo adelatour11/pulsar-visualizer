@@ -1,4 +1,4 @@
-# Pulsar Joy Waveform Visualizer
+# Pulsar Waveform Visualizer
 
 A minimalist HTML5 audio visualizer inspired by the iconic **Joy Division – Unknown Pleasures** waveform artwork and the Plexamp Pulsar Joy animation.
 

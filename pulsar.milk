@@ -10,37 +10,6 @@ fGammaAdj=1.000
 
 
 ; ================================================================
-; UNKNOWN PLEASURES
-; ================================================================
-;
-; 80 stacked spectrum traces
-;
-; HORIZONTAL GEOMETRY
-;
-;        0%        25%                 75%        100%
-;         |----------|====================|----------|
-;                     ACTIVE SPECTRUM
-;
-; The spectrum occupies EXACTLY the central 50%.
-;
-; IMPORTANT FIX:
-;
-; The first and last spectrum samples are forced to the
-; baseline so the waveform enters and exits the active region
-; horizontally rather than starting at an arbitrary height.
-;
-; Design unchanged:
-;   - same 50% width
-;   - same center
-;   - same spectrum mapping
-;   - same peak processing
-;   - same 80 traces
-;   - same speed
-;
-; ================================================================
-
-
-; ================================================================
 ; GLOBAL
 ; ================================================================
 

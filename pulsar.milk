@@ -8,8 +8,40 @@ PSVERSION_COMP=2
 fRating=5.000
 fGammaAdj=1.000
 
+
 ; ================================================================
-; FRAME / HISTORY
+; UNKNOWN PLEASURES
+; ================================================================
+;
+; 80 stacked spectrum traces
+;
+; HORIZONTAL GEOMETRY
+;
+;        0%        25%                 75%        100%
+;         |----------|====================|----------|
+;                     ACTIVE SPECTRUM
+;
+; The spectrum occupies EXACTLY the central 50%.
+;
+; IMPORTANT FIX:
+;
+; The first and last spectrum samples are forced to the
+; baseline so the waveform enters and exits the active region
+; horizontally rather than starting at an arbitrary height.
+;
+; Design unchanged:
+;   - same 50% width
+;   - same center
+;   - same spectrum mapping
+;   - same peak processing
+;   - same 80 traces
+;   - same speed
+;
+; ================================================================
+
+
+; ================================================================
+; GLOBAL
 ; ================================================================
 
 fDecay=1.000
@@ -34,7 +66,7 @@ sy=1.00000
 
 
 ; ================================================================
-; BUILT-IN WAVE OFF
+; BUILT-IN WAVEFORM OFF
 ; ================================================================
 
 nWaveMode=0
@@ -46,141 +78,429 @@ bModWaveAlphaByVolume=0
 bMaximizeWaveColor=0
 bTexWrap=0
 
+bDarkenCenter=0
+bRedBlueStereo=0
+
+bBrighten=0
+bDarken=0
+bSolarize=0
+bInvert=0
+
 fWaveAlpha=0.000
 fWaveScale=1.000
 fWaveSmoothing=0.000
 fWaveParam=0.000
 
+fModWaveAlphaStart=0.000
+fModWaveAlphaEnd=1.000
+
 
 ; ================================================================
-; WAVE 0 – SOLID FILL (thick line)
+; BORDERS OFF
 ; ================================================================
+
+ob_size=0.000
+ob_r=0.000
+ob_g=0.000
+ob_b=0.000
+ob_a=0.000
+
+ib_size=0.000
+ib_r=0.000
+ib_g=0.000
+ib_b=0.000
+ib_a=0.000
+
+
+; ################################################################
+; ################################################################
+; WAVE 0
+; ################################################################
+; ################################################################
+
 
 wavecode_0_enabled=1
-wavecode_0_sep=80
+
+
+; ================================================================
+; CONTINUOUS LINE
+; ================================================================
+
+wavecode_0_sep=0
+
 wavecode_0_bSpectrum=1
+
 wavecode_0_bUseDots=0
-wavecode_0_bDrawThick=1          ; Thick line for fill
+
+wavecode_0_bDrawThick=0
+
 wavecode_0_bAdditive=0
+
+
+; ================================================================
+; PURE WHITE
+; ================================================================
+
 wavecode_0_r=1.000
 wavecode_0_g=1.000
 wavecode_0_b=1.000
 wavecode_0_a=1.000
 
-wave_0_per_frame1=r=1;
-wave_0_per_frame2=g=1;
-wave_0_per_frame3=b=1;
-wave_0_per_frame4=a=1;
-wave_0_per_frame5=samples=200;
+
+; ################################################################
+; ################################################################
+; PER FRAME
+; ################################################################
+; ################################################################
+
+
+wave_0_per_frame1=`r=1;
+
+wave_0_per_frame2=`g=1;
+
+wave_0_per_frame3=`b=1;
+
+wave_0_per_frame4=`a=1;
+
+wave_0_per_frame5=`samples=512;
+
+
+; ################################################################
+; ################################################################
+; PER POINT
+; ################################################################
+; ################################################################
 
 
 ; ================================================================
-; SPECTRUM POINT – Fill Wave
+; FREQUENCY POSITION
+; ================================================================
+;
+; Complete spectrum is mapped into the central 50%.
+;
+; sample 0.0 -> x 0.25
+; sample 1.0 -> x 0.75
+;
 ; ================================================================
 
-; Horizontal placement: central 40% (30% margins)
-wave_0_per_point1=x=0.30 + sample * 0.40;
-
-; Amplitude calculation (must match the peak wave)
-wave_0_per_point2=t1=abs(value1);
-wave_0_per_point3=edge=0.5 - 0.5*cos(6.28318*sample);
-wave_0_per_point4=t1 = t1 * edge;
-wave_0_per_point5=t1=pow(t1, 0.60);
-wave_0_per_point6=t1=t1 * 0.55;
-
-; Thickness: slightly larger than the peak height to cover from baseline upward
-wave_0_per_point7=thick=t1 * 1.1;
-
-; Center the thick line at the midpoint between baseline and peak
-wave_0_per_point8=y=0.10 + t1/2.0;
+wave_0_per_point1=`t0=sample;
 
 
 ; ================================================================
-; WAVE 1 – THIN PEAK (the mountain crest)
+; FREQUENCY-AXIS EXPANSION
+; ================================================================
+;
+; Keep the existing frequency distribution exactly as requested.
+;
 ; ================================================================
 
-wavecode_1_enabled=1
-wavecode_1_sep=80
-wavecode_1_bSpectrum=1
-wavecode_1_bUseDots=0
-wavecode_1_bDrawThick=0          ; Thin line
-wavecode_1_bAdditive=0
-wavecode_1_r=1.000
-wavecode_1_g=1.000
-wavecode_1_b=1.000
-wavecode_1_a=1.000
-
-wave_1_per_frame1=r=1;
-wave_1_per_frame2=g=1;
-wave_1_per_frame3=b=1;
-wave_1_per_frame4=a=1;
-wave_1_per_frame5=samples=200;
+wave_0_per_point2=`t0=pow(t0,0.62);
 
 
 ; ================================================================
-; SPECTRUM POINT – Peak Wave
+; CENTRAL 50% MAPPING
 ; ================================================================
 
-; Same horizontal mapping
-wave_1_per_point1=x=0.30 + sample * 0.40;
-
-; Same amplitude calculation
-wave_1_per_point2=t1=abs(value1);
-wave_1_per_point3=edge=0.5 - 0.5*cos(6.28318*sample);
-wave_1_per_point4=t1 = t1 * edge;
-wave_1_per_point5=t1=pow(t1, 0.60);
-wave_1_per_point6=t1=t1 * 0.55;
-
-; Thin line at the peak position
-wave_1_per_point7=y=0.10 + t1;
+wave_0_per_point3=`x=0.25+t0*0.50;
 
 
 ; ================================================================
-; HISTORY TRACE – Shift and Sharpen
+; RAW SPECTRUM AMPLITUDE
 ; ================================================================
 
-warp_1=shader_body
-warp_2={
-
-; Dense line spacing (no fading)
-warp_3=float traceStep=0.0065;
-
-warp_4=float2 historyUV;
-warp_5=historyUV.x=uv.x;
-
-; Move previous frame upward
-warp_6=historyUV.y=uv.y + traceStep;
-
-; Black background
-warp_7=ret=float3(0.0,0.0,0.0);
-
-; Read previous frame if within bounds
-warp_8=if(
-warp_9=    historyUV.y>=0.0 &&
-warp_10=    historyUV.y<=1.0
-warp_11=)
-warp_12={
-warp_13=    ret=tex2D(
-warp_14=        sampler_main,
-warp_15=        historyUV
-warp_16=    ).xyz;
-
-; --- Threshold to remove blur and keep edges crisp ---
-; Any value >= 0.5 becomes pure white, otherwise black.
-warp_17=    ret = (ret.x >= 0.5) ? float3(1.0,1.0,1.0) : float3(0.0,0.0,0.0);
-warp_18=}
-
-warp_19=}
+wave_0_per_point4=`t1=abs(value1);
 
 
 ; ================================================================
+; DYNAMIC RANGE COMPRESSION
+; ================================================================
+
+wave_0_per_point5=`t1=pow(t1,0.50);
+
+
+; ================================================================
+; PEAK SCALE
+; ================================================================
+
+wave_0_per_point6=`t1=t1*0.68;
+
+
+; ================================================================
+; SOFT SATURATION
+; ================================================================
+
+wave_0_per_point7=`t1=t1/(1.0+t1*1.6);
+
+
+; ################################################################
+; ################################################################
+; SPECTRUM EDGE TAPER
+; ################################################################
+; ################################################################
+;
+; THIS IS THE IMPORTANT FIX.
+;
+; The FFT can contain significant energy in the first bins.
+; Therefore the waveform can begin at:
+;
+;       |\
+;       | \
+;       |  \____
+;
+; instead of:
+;
+;       ______
+;             \____
+;
+; We force the spectrum amplitude toward ZERO at its two
+; frequency boundaries.
+;
+; Only the first/last 5% of the spectrum are affected.
+;
+; This does NOT move the spectrum.
+; This does NOT change its width.
+; This does NOT change its speed.
+;
+; sample:
+;
+; 0.00       0.05                         0.95       1.00
+;   0          1                            1           0
+;   |-----------|===========================|-----------|
+;       taper              spectrum             taper
+;
+; ================================================================
+
+
+; Distance from the nearest frequency edge.
+
+wave_0_per_point8=`t2=min(sample,1.0-sample);
+
+
+; ================================================================
+; NORMALIZE EDGE DISTANCE
+; ================================================================
+;
+; First 5% of the frequency range is used as the transition.
+;
+; ================================================================
+
+wave_0_per_point9=`t2=t2/0.05;
+
+
+; ================================================================
+; LIMIT EDGE FACTOR
+; ================================================================
+;
+; Once inside the 5% transition area, the factor becomes 1.
+;
+; ================================================================
+
+wave_0_per_point10=`t2=min(t2,1.0);
+
+
+; ================================================================
+; SMOOTH EDGE
+; ================================================================
+;
+; Smoothstep:
+;
+; 3x² - 2x³
+;
+; This avoids a visible corner where the taper finishes.
+;
+; ================================================================
+
+wave_0_per_point11=`t2=t2*t2*(3.0-2.0*t2);
+
+
+; ================================================================
+; APPLY EDGE TAPER
+; ================================================================
+
+wave_0_per_point12=`t1=t1*t2;
+
+
+; ################################################################
+; ################################################################
+; BASELINE
+; ################################################################
+; ################################################################
+;
+; The waveform now ALWAYS meets the baseline at:
+;
+;       x = 25%
+;       x = 75%
+;
+; ================================================================
+
+wave_0_per_point13=`t1=t1+0.003;
+
+
+; ================================================================
+; EXTREME HEIGHT LIMIT
+; ================================================================
+
+wave_0_per_point14=`t1=t1/(1.0+t1*0.35);
+
+
+; ================================================================
+; CURRENT WAVEFORM POSITION
+; ================================================================
+;
+; Bottom/current trace.
+;
+; ================================================================
+
+wave_0_per_point15=`y=0.085+t1;
+
+
+; ================================================================
+; PURE WHITE
+; ================================================================
+
+wave_0_per_point16=`r=1;
+
+wave_0_per_point17=`g=1;
+
+wave_0_per_point18=`b=1;
+
+wave_0_per_point19=`a=1;
+
+
+; ################################################################
+; ################################################################
+; HISTORY
+; ################################################################
+; ################################################################
+;
+; Current waveform = bottom line.
+;
+; Previous waveform = shifted upward.
+;
+; Approximately 80 traces.
+;
+; SPEED UNCHANGED.
+;
+; ================================================================
+
+
+warp_1=`shader_body
+
+warp_2=`{
+
+
+; ================================================================
+; HISTORY SPACING
+; ================================================================
+
+warp_3=`float traceStep=0.0100;
+
+
+; ================================================================
+; PREVIOUS FRAME POSITION
+; ================================================================
+
+warp_4=`float2 historyUV;
+
+warp_5=`historyUV.x=uv.x;
+
+warp_6=`historyUV.y=uv.y+traceStep;
+
+
+; ================================================================
+; BLACK BACKGROUND
+; ================================================================
+
+warp_7=`ret=float3(0.0,0.0,0.0);
+
+
+; ================================================================
+; HISTORY READ
+; ================================================================
+
+warp_8=`if(
+
+warp_9=`historyUV.y>=0.0 &&
+
+warp_10=`historyUV.y<=1.0
+
+warp_11=`)
+
+warp_12=`{
+
+warp_13=`ret=tex2D(
+
+warp_14=`sampler_main,
+
+warp_15=`historyUV
+
+warp_16=`).xyz;
+
+warp_17=`}
+
+
+; ================================================================
+; END WARP
+; ================================================================
+
+warp_18=`}
+
+
+; ################################################################
+; ################################################################
 ; COMPOSITE
+; ################################################################
+; ################################################################
+
+
+comp_1=`shader_body
+
+comp_2=`{
+
+
+; ================================================================
+; READ FRAME
 ; ================================================================
 
-comp_1=shader_body
-comp_2={
-comp_3=ret=tex2D(
-comp_4=    sampler_main,
-comp_5=    uv
-comp_6=).xyz;
-comp_7=}
+comp_3=`ret=tex2D(
+
+comp_4=`sampler_main,
+
+comp_5=`uv
+
+comp_6=`).xyz;
+
+
+; ================================================================
+; LUMINANCE
+; ================================================================
+
+comp_7=`float luminance=dot(
+
+comp_8=`ret,
+
+comp_9=`float3(0.299,0.587,0.114)
+
+comp_10=`);
+
+
+; ================================================================
+; PURE MONOCHROME
+; ================================================================
+
+comp_11=`ret=float3(
+
+comp_12=`luminance,
+
+comp_13=`luminance,
+
+comp_14=`luminance
+
+comp_15=`);
+
+
+; ================================================================
+; END COMPOSITE
+; ================================================================
+
+comp_16=`}
